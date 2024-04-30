@@ -1,64 +1,49 @@
 package main
 
 import (
-	"os"
-	"os/exec"
+	"bytes"
+	"fmt"
+	"log"
+	"strings"
 	"testing"
+
+	"github.com/mattmc3/str/strlib"
 )
 
-func TestStrPrintsHelloWorld(t *testing.T) {
-	// Run the str program without arguments
-	output, err := runStr()
-	if err != nil {
-		t.Fatalf("error executing str: %v", err)
+func TestHelp(t *testing.T) {
+	// mocks
+	var stdoutBuf bytes.Buffer
+	var stderrBuf bytes.Buffer
+	strlib.Stdout = log.New(&stdoutBuf, "", 0)
+	strlib.Stderr = log.New(&stderrBuf, "string: ", 0)
+	status := 0
+	strlib.Exit = func(code int) {
+		status = code
 	}
 
-	// Check if output matches "Hello, world!"
-	expected := "Hello, world!\n" // Expecting a newline at the end
-	if output != expected {
-		t.Errorf("expected '%s', got '%s'", expected, output)
-	}
-}
-
-func TestStrPrintsCustomMessage(t *testing.T) {
-	// Run the str program with custom arguments
-	output, err := runStr("Go", "Developer")
-	if err != nil {
-		t.Fatalf("error executing str: %v", err)
+	testCases := []struct {
+		subcommand  string
+		usagePrefix string
+	}{
+		// {"join", "str-join - join strings with delimiter"},
+		// {"join0", "str-join - join strings with delimiter"},
+		{"length", "str-length - print string lengths"},
+		// {"lower", "str-lower - convert strings to lowercase"},
+		// {"upper", "str-upper - convert strings to uppercase"},
 	}
 
-	// Check if output matches "Hello, Go Developer!"
-	expected := "Hello, Go Developer!\n" // Expecting a newline at the end
-	if output != expected {
-		t.Errorf("expected '%s', got '%s'", expected, output)
+	for _, tc := range testCases {
+		stdoutBuf.Reset()
+		stderrBuf.Reset()
+		stringArgs = []string{"string", tc.subcommand, "--help"}
+		t.Run(fmt.Sprintf("Args: %v", stringArgs), func(t *testing.T) {
+			main()
+			if !strings.HasPrefix(stdoutBuf.String(), tc.usagePrefix) {
+				t.Errorf("Expected usage prefix: %#v, got: %#v", tc.usagePrefix, stdoutBuf.String())
+			}
+			if status != strlib.Success {
+				t.Errorf("Expected exit status: %v, got: %v", strlib.Success, status)
+			}
+		})
 	}
-}
-
-func runStr(args ...string) (string, error) {
-	// Construct command to run str program with arguments
-	cmdArgs := append([]string{"./str"}, args...)
-	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
-
-	// Run command and capture output
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	// Convert output to string
-	return string(output), nil
-}
-
-func TestMain(m *testing.M) {
-	// Build the str program before running the tests
-	cmd := exec.Command("go", "build", "-o", "str", "str.go")
-	if err := cmd.Run(); err != nil {
-		println("Failed to build str:", err)
-		os.Exit(1)
-	}
-	// Run the tests
-	result := m.Run()
-	// Clean up after tests
-	os.Remove("str")
-	os.Exit(result)
 }
