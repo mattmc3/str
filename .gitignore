@@ -22,3 +22,6 @@ go.work
 
 # Sandbox files
 foo.*
+
+# Local bin
+str
