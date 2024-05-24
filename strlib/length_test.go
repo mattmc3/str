@@ -12,7 +12,7 @@ func TestLengthCommand(t *testing.T) {
 	var stdoutBuf bytes.Buffer
 	var stderrBuf bytes.Buffer
 	Stdout = log.New(&stdoutBuf, "", 0)
-	Stderr = log.New(&stderrBuf, "string: ", 0)
+	Stderr = log.New(&stderrBuf, "str: ", 0)
 	Exit = func(status int) {
 	}
 

@@ -1,17 +1,20 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/mattmc3/str/strlib"
 )
 
-var stringArgs = os.Args
+var strArgs = os.Args
 
-const stringUsage = `string - manipulate strings
+const strUsage = `str - manipulate strings
 
 USAGE
-   string <SUBCOMMAND> [flags] [STRING ...]
+   str <SUBCOMMAND> [flags] [STRING ...]
 
 SUBCOMMANDS
    join       join strings with delimiter
@@ -48,25 +51,38 @@ exits with the documented status. In this case these commands will quit early, w
 reading all of the available input.`
 
 func main() {
-	if len(stringArgs) < 2 {
+	if len(strArgs) < 2 {
 		strlib.Stderr.Println("Usage: string <command> [<args>]")
 		strlib.Exit(strlib.Failure)
 	}
 
-	cmd := stringArgs[1]
-	args := stringArgs[2:]
+	cmd := strArgs[1]
+	args := strArgs[2:]
+
+	// Check if there is piped input
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// Read from pipe
+		bytes, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading from pipe: %v\n", err)
+			os.Exit(1)
+		}
+		args = append(args, strings.TrimSpace(string(bytes)))
+	}
+
 	status := 0
 	switch cmd {
 	case "-h", "--help":
-		strlib.Stdout.Println(stringUsage)
+		strlib.Stdout.Println(strUsage)
 	// case "join", "join0":
 	// 	status = strlib.JoinCommand(cmd, args...)
 	case "length":
 		status = strlib.LengthCommand(args...)
-	// case "lower", "upper":
-	// 	status = strlib.ChangeCaseCommand(cmd, args...)
+	case "lower", "upper":
+		status = strlib.ChangeCaseCommand(cmd, args...)
 	default:
-		strlib.Stderr.Printf("%s: invalid subcommand\n\nrun 'string -h' for help\n", cmd)
+		strlib.Stderr.Printf("%s: invalid subcommand\n\nrun 'str -h' for help\n", cmd)
 		strlib.Exit(strlib.SyntaxError)
 	}
 	strlib.Exit(status)

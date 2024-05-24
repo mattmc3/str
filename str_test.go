@@ -15,7 +15,7 @@ func TestHelp(t *testing.T) {
 	var stdoutBuf bytes.Buffer
 	var stderrBuf bytes.Buffer
 	strlib.Stdout = log.New(&stdoutBuf, "", 0)
-	strlib.Stderr = log.New(&stderrBuf, "string: ", 0)
+	strlib.Stderr = log.New(&stderrBuf, "str: ", 0)
 	status := 0
 	strlib.Exit = func(code int) {
 		status = code
@@ -35,8 +35,8 @@ func TestHelp(t *testing.T) {
 	for _, tc := range testCases {
 		stdoutBuf.Reset()
 		stderrBuf.Reset()
-		stringArgs = []string{"string", tc.subcommand, "--help"}
-		t.Run(fmt.Sprintf("Args: %v", stringArgs), func(t *testing.T) {
+		strArgs = []string{"str", tc.subcommand, "--help"}
+		t.Run(fmt.Sprintf("Args: %v", strArgs), func(t *testing.T) {
 			main()
 			if !strings.HasPrefix(stdoutBuf.String(), tc.usagePrefix) {
 				t.Errorf("Expected usage prefix: %#v, got: %#v", tc.usagePrefix, stdoutBuf.String())

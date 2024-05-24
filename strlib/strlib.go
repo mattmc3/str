@@ -17,16 +17,19 @@ import (
 
 // These constants cause FlagSet.Parse to behave as described if the parse fails.
 const (
-	Success     = 0 // CLI code for success exit status.
-	Failure     = 1 // CLI code for failure exit status.
-	SyntaxError = 2 // CLI code for incorrect syntax status.
+	Success     = 0 // Success exit status.
+	Failure     = 1 // Failure exit status.
+	SyntaxError = 2 // Incorrect syntax status.
 )
 
 // standard output
 var Stdout = log.New(os.Stdout, "", 0)
 
 // standard error output
-var Stderr = log.New(os.Stderr, "string: ", 0)
+var Stderr = log.New(os.Stderr, "str: ", 0)
+
+// standard input
+var Stdin = os.Stdin
 
 // Wrap os.Exit so it can be mocked during testing
 var Exit = func(status int) {
