@@ -28,8 +28,8 @@ func TestHelp(t *testing.T) {
 		// {"join", "str-join - join strings with delimiter"},
 		// {"join0", "str-join - join strings with delimiter"},
 		{"length", "str-length - print string lengths"},
-		// {"lower", "str-lower - convert strings to lowercase"},
-		// {"upper", "str-upper - convert strings to uppercase"},
+		{"lower", "str-lower - convert strings to lowercase"},
+		{"upper", "str-upper - convert strings to uppercase"},
 	}
 
 	for _, tc := range testCases {
