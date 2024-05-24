@@ -15,7 +15,7 @@ import (
 // 	return fmt.Sprintf("str: %v", se.Err)
 // }
 
-// These constants cause FlagSet.Parse to behave as described if the parse fails.
+// Exit status.
 const (
 	Success     = 0 // Success exit status.
 	Failure     = 1 // Failure exit status.
