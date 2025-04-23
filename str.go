@@ -81,6 +81,8 @@ func main() {
 		status = strlib.LengthCommand(args...)
 	case "lower", "upper":
 		status = strlib.ChangeCaseCommand(cmd, args...)
+	case "trim":
+		status = strlib.TrimCommand(args...)
 	default:
 		strlib.Stderr.Printf("%s: invalid subcommand\n\nrun 'str -h' for help\n", cmd)
 		strlib.Exit(strlib.SyntaxError)
