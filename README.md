@@ -1,2 +1,5 @@
 # str
-A modern command line string utility
+
+> A command line string handler.
+
+Shamelessly modeled after Fish's excellent [string][fish-string] utility, `str` brings lightning fast string manipulation to Bash, Zsh, and other shells.

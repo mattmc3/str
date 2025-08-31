@@ -1,30 +1,15 @@
-# Do not remove ##? comments. They are used by 'help' to construct the help docs.
-##? str - manipulate strings
-##?
-##? Usage:  make <command>
-##?
-##? Commands:
+NIM ?= nim
+SRC := src/str.nim
+TEST := tests/test_str.nim
+BIN := bin/str
 
-.DEFAULT_GOAL := help
-all : build test testv fmt help
-.PHONY : all
+.PHONY: build test
 
-##? help        print this message
-help:
-	@grep "^##?" makefile | cut -c 5-
+build: $(BIN)
 
-##? build       run build tasks
-build:
-	go build -o str ./str.go
+$(BIN): $(SRC)
+	mkdir -p bin
+	$(NIM) c -d:release -o:$(BIN) $(SRC)
 
-##? test        run tests
 test:
-	go test ./... | ./bin/colorize
-
-##? testv       run verbose tests
-testv:
-	go test -v ./... | ./bin/colorize
-
-# gofmt and goimports all go files
-fmt:
-	find . -name '*.go' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
+	$(NIM) r $(TEST)
