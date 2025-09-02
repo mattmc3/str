@@ -12,6 +12,6 @@ htmldocs/
 foo.*
 
 # Local bin
-bin/str
+bin/*
 nimble.develop
 nimble.paths
