@@ -1,84 +1,66 @@
-import ./cli_command
-import std/parseopt
-import std/[os]
-import std/strutils
+## str - manipulate strings
 
-# Swappable writers export
-type StrTransform* = proc (s: string): string
+# nimble install cligen
+# nimble install posix
+import cligen
+import posix
+import std/[strutils, tables, os]
 
-# StrCommand inherits base CliCommand
-type StrCommand* = ref object of CliCommand
+type StrTransform* = proc(s: string): string
 
-method usage*(self: StrCommand) =
-  self.output("""
-Usage: str <subcommand> [args...]
-Subcommands:
-  upper <strings...>   Convert to UPPERCASE
-  lower <strings...>   Convert to lowercase
-  length <strings...>  Print length of each string
-""")
+proc output(s: string) =
+  stdout.write(s)
 
-proc transform(self: StrCommand, transform: StrTransform, args: seq[string]): int =
+proc outerr(s: string) =
+  stderr.write(s)
+
+proc appendPipedArgs(args: seq[string]): seq[string] =
+  # Return args plus piped stdin lines, but only when no explicit args were given.
+  result = @args
+  if args.len == 0 and isatty(0) == 0:
+    for line in stdin.lines:
+      if line.len > 0 and line[^1] == '\r':
+        result.add(line[0 ..< line.len-1])
+      else:
+        result.add(line)
+
+proc length*(quiet = false, args: seq[string]): int =
+  ## Print the length of each string.
+  let allArgs = appendPipedArgs(args)
   var exitcode = 1
-  for s in args:
+  for s in allArgs:
+    if s.len != 0:
+      exitcode = 0
+    if not quiet: output($s.len & "\n")
+  return exitcode
+
+proc transform(transform: StrTransform, quiet = false, args: seq[string]): int =
+  let allArgs = appendPipedArgs(args)
+  var exitcode = 1
+  for s in allArgs:
     let newstr = transform(s)
     if newstr != s:
       exitcode = 0
-    self.output(newstr & "\n")          # use output() instead of echo
+    if not quiet: output(newstr & "\n")
   return exitcode
 
-proc upper*(self: StrCommand, args: seq[string]): int =
-  return self.transform(toUpperAscii, args)
+proc lower*(quiet = false, args: seq[string]): int =
+  ## Lowercase each string argument
+  return transform(toLowerAscii, quiet, args)
 
-proc lower*(self: StrCommand, args: seq[string]): int =
-  return self.transform(toLowerAscii, args)
-
-proc length*(self: StrCommand, args: seq[string]): int =
-  var exitcode = 1
-  for s in args:
-    if s.len != 0:
-      exitcode = 0
-    self.output($s.len & "\n")          # use output()
-  return exitcode
-
-proc run*(self: StrCommand, args: seq[string]): int =
-  let subcmd = if args.len == 0: "" else: args[0]
-  let rest = if args.len > 1: args[1..^1] else: @[]
-
-  # Parse only subcommand-local options
-  var positional: seq[string] = @[]
-  if rest.len > 0:
-    var parser = initOptParser(rest)
-    for kind, key, val in parser.getopt():
-      case kind
-      of cmdShortOption, cmdLongOption:
-        case key
-        of "q", "quiet":
-          self.quiet = true
-        else:
-          self.outerr("Unknown option for " & subcmd & ": " &
-            (if kind == cmdShortOption: "-" else: "--") & key & "\n")
-          return 1
-      of cmdArgument:
-        positional.add key
-      of cmdEnd:
-        discard
-
-  case subcmd
-  of "upper":
-    return self.upper(positional)
-  of "lower":
-    return self.lower(positional)
-  of "length":
-    return self.length(positional)
-  of "help", "--help", "-h":
-    self.usage()
-    return 0
-  else:
-    self.outerr("Unknown subcommand: '" & subcmd & "'\n")
-    self.usage()
-    return 1
+proc upper*(quiet = false, args: seq[string]): int =
+  ## Uppercase each string argument
+  return transform(toUpperAscii, quiet, args)
 
 when isMainModule:
-  var cmd = StrCommand()
-  quit(cmd.run(commandLineParams()))
+  # Use cligen's native help/exit codes now.
+  clCfg.helpSyntax = ""
+  clCfg.hTabSuppress = "CLIGEN-NOHELP"
+
+  const generalHelp = { "quiet": "Suppress output" }.toTable()
+
+  dispatchMulti(
+    [length, help=generalHelp],
+    [lower,  help=generalHelp],
+    [upper,  help=generalHelp],
+  )

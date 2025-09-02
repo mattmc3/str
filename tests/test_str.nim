@@ -11,10 +11,13 @@ proc buildIfNeeded() =
     let code = execCmd(cmd)
     doAssert code == 0, "Failed to build str binary"
 
-proc runStr(args: seq[string]): tuple[code: int, stdout: string, stderr: string] =
+proc runStr(args: seq[string], stdinData = ""): tuple[code: int, stdout: string, stderr: string] =
   buildIfNeeded()
   let exePath = joinPath(getCurrentDir(), "bin", exeName)
   let p = startProcess(exePath, args = args)
+  if stdinData.len > 0:
+    p.inputStream.write(stdinData)
+  p.inputStream.close()
   let outData = p.outputStream.readAll()
   let errData = p.errorStream.readAll()
   let code = p.waitForExit()
@@ -25,18 +28,27 @@ proc runStr(args: seq[string]): tuple[code: int, stdout: string, stderr: string]
 suite "str CLI usage":
   test "usage: no args":
     let r = runStr(@[])
-    check r.code == 1
-    check "Usage: str" in r.stdout
+    check r.code == 0
+    check "str - manipulate strings" in r.stdout
+    check "Usage:" in r.stdout
 
-  test "usage: help":
+  test "usage: help (-h)":
+    let r = runStr(@["-h"])
+    check r.code == 0
+    check "help    print comprehensive or per-cmd help" in r.stdout
+    check "length" in r.stdout
+
+  test "usage: help subcommand":
     let r = runStr(@["help"])
     check r.code == 0
-    check "Subcommands:" in r.stdout
+    check "length" in r.stdout
+    check "upper" in r.stdout
 
   test "unknown subcommand":
     let r = runStr(@["wat"])
-    check r.code == 1
-    check "Unknown subcommand" in (r.stderr & r.stdout)
+    check r.code != 0
+    let combined = (r.stderr & r.stdout).toLowerAscii
+    check ("no such" in combined) or ("unknown" in combined)
 
 # Upper subcommand
 suite "str CLI upper":
