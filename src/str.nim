@@ -42,23 +42,40 @@ proc length*(self: StrCommand, args: seq[string]): int =
   return exitcode
 
 proc run*(self: StrCommand, args: seq[string]): int =
-  if args.len == 0:
-    self.usage()
-    return 1
-  let subcmd = args[0]
-  let args = args[1..^1]
+  let subcmd = if args.len == 0: "" else: args[0]
+  let rest = if args.len > 1: args[1..^1] else: @[]
+
+  # Parse only subcommand-local options
+  var positional: seq[string] = @[]
+  if rest.len > 0:
+    var parser = initOptParser(rest)
+    for kind, key, val in parser.getopt():
+      case kind
+      of cmdShortOption, cmdLongOption:
+        case key
+        of "q", "quiet":
+          self.quiet = true
+        else:
+          self.outerr("Unknown option for " & subcmd & ": " &
+            (if kind == cmdShortOption: "-" else: "--") & key & "\n")
+          return 1
+      of cmdArgument:
+        positional.add key
+      of cmdEnd:
+        discard
+
   case subcmd
   of "upper":
-    return self.upper(args)
+    return self.upper(positional)
   of "lower":
-    return self.lower(args)
+    return self.lower(positional)
   of "length":
-    return self.length(args)
+    return self.length(positional)
   of "help", "--help", "-h":
     self.usage()
     return 0
   else:
-    self.outerr("Unknown subcommand: '" & subcmd & "'")
+    self.outerr("Unknown subcommand: '" & subcmd & "'\n")
     self.usage()
     return 1
 
