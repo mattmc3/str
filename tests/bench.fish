@@ -4,7 +4,7 @@ set -l words foo bar baz qux quux corge grault garply waldo fred plugh xyzzy thu
 
 set -l scriptdir (status dirname)
 set -l nim_str $scriptdir/../bin/str
-set -l nim_str_fast $scriptdir/../bin/str-fast
+#set -l nim_str_fast $scriptdir/../bin/str-fast
 
 # DRY benchmark loop
 function bench_loop
@@ -33,4 +33,4 @@ for s in $subs
     echo (set_color blue)$_sep_line(set_color normal)
 end
 
-echo "Set ITER to adjust iterations: ITER=300 fish tests/bench.fish"
+echo "Set ITER to adjust iterations: ITER=500 fish tests/bench.fish"

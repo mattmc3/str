@@ -1,29 +1,23 @@
 #!/usr/bin/env fish
 set -l words foo bar baz qux quux corge grault garply waldo fred plugh xyzzy thud
-set -q ITER; or set ITER 1000
+set -q ITER; or set ITER 2500
 
 set -l scriptdir (status dirname)
 set -l nim_str $scriptdir/../bin/str
-set -l nim_strcase $scriptdir/../bin/strcase
 
 echo "Testing Fish builtin..."
 time for i in (seq $ITER)
     string upper $words >/dev/null
 end
 
-# echo "Testing Nim version..."
-# time for i in (seq $ITER)
-#     $nim_str upper $words >/dev/null
-# end
-
-# echo "Testing Nim version part 2..."
-# time for i in (seq $ITER)
-#     printf '%s\n' $words | $nim_str upper >/dev/null
-# end
-
-echo "Testing Nim version part 3..."
+echo "Testing Nim version..."
 time for i in (seq $ITER)
-    $nim_strcase upper $words >/dev/null
+    $nim_str upper $words >/dev/null
+end
+
+echo "Testing Nim version part 2..."
+time for i in (seq $ITER)
+    printf '%s\n' $words | $nim_str upper >/dev/null
 end
 
 echo "Testing tr version..."
