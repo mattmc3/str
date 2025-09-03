@@ -2,7 +2,7 @@ import std/parseopt
 import ./utils
 
 proc strlengthUsage*() =
-  output("string length [-q | --quiet] [STRING ...]\n")
+  output("string length [-q | --quiet] [STRING ...]")
 
 proc strlength*(quiet = false, strings: seq[string]): int =
   ## Print the length of each string.
@@ -11,7 +11,7 @@ proc strlength*(quiet = false, strings: seq[string]): int =
     if s.len != 0:
       exitcode = 0
     if not quiet:
-      output($s.len & "\n")
+      output($s.len)
   return exitcode
 
 proc strlengthCmd*(args: seq[string]): int =
@@ -32,7 +32,7 @@ proc strlengthCmd*(args: seq[string]): int =
           var prefix = if kind == cmdShortOption: "-" else: "--"
           strings.add prefix & key
         else:
-          case key:
+          case key
           of "h", "help":
             strlengthUsage()
             return 0

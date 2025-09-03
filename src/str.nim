@@ -3,6 +3,7 @@ import std/os
 import str/utils
 import str/changecase
 import str/length
+import str/match
 
 const StrUsageText* =
   """str - manipulate strings
@@ -18,13 +19,13 @@ Commands:
 """
 
 proc strUsage*() =
-  output(StrUsageText & "\n")
+  output(StrUsageText)
 
 when isMainModule:
   let args = commandLineParams()
 
   if args.len == 0:
-    outerr("str: missing subcommand\n")
+    outerr("str: missing subcommand")
     quit(2)
 
   let cmd = args[0]
@@ -40,6 +41,8 @@ when isMainModule:
     exitcode = strcaseCmd(cmd, rest)
   of "length":
     exitcode = strlengthCmd(rest)
+  of "match":
+    exitcode = strmatchCmd(rest)
   of "-h", "--help", "help":
     strUsage()
   else:

@@ -2,9 +2,11 @@ import posix
 
 proc output*(s: string) =
   stdout.write(s)
+  stdout.write('\n')
 
 proc outerr*(s: string) =
   stderr.write(s)
+  stderr.write('\n')
 
 proc getPipedArgs*(): seq[string] =
   result = @[]
