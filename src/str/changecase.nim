@@ -64,8 +64,14 @@ proc strcaseCmd*(args: seq[string]): int =
     of cmdEnd:
       discard
 
-  var allStrings = appendPipedArgs(strings)
-  return strcase(transform, quiet, allStrings)
+  let piped = getPipedArgs()
+  if strings.len > 0 and piped.len > 0:
+    outerr("str length: too many arguments")
+    return 2
+  elif strings.len == 0 and piped.len > 0:
+    strings = piped
+
+  return strcase(transform, quiet, strings)
 
 when isMainModule:
   import std/os

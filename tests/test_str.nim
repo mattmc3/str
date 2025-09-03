@@ -11,7 +11,9 @@ proc buildIfNeeded() =
     let code = execCmd(cmd)
     doAssert code == 0, "Failed to build str binary"
 
-proc runStr(args: seq[string], stdinData = ""): tuple[code: int, stdout: string, stderr: string] =
+proc runStr(
+    args: seq[string], stdinData = ""
+): tuple[code: int, stdout: string, stderr: string] =
   buildIfNeeded()
   let exePath = joinPath(getCurrentDir(), "bin", exeName)
   let p = startProcess(exePath, args = args)
@@ -25,7 +27,7 @@ proc runStr(args: seq[string], stdinData = ""): tuple[code: int, stdout: string,
   (code, outData, errData)
 
 # Usage / meta tests
-suite "str CLI usage":
+suite "str usage":
   test "usage: no args":
     let r = runStr(@[])
     check r.code == 0
@@ -51,7 +53,7 @@ suite "str CLI usage":
     check ("no such" in combined) or ("unknown" in combined)
 
 # Upper subcommand
-suite "str CLI upper":
+suite "str upper":
   test "upper changes lowercase":
     let r = runStr(@["upper", "foo"])
     check r.stdout.strip.splitLines() == @["FOO"]
@@ -78,7 +80,7 @@ suite "str CLI upper":
     check r.code == 1
 
 # Lower subcommand
-suite "str CLI lower":
+suite "str lower":
   test "lower changes":
     let r = runStr(@["lower", "Foo", "BAR"])
     check r.stdout.strip.splitLines() == @["foo", "bar"]
@@ -100,7 +102,7 @@ suite "str CLI lower":
     check r.code == 1
 
 # Length subcommand
-suite "str CLI length":
+suite "str length":
   test "length prints":
     let r = runStr(@["length", "one", "three", ""])
     check r.stdout.strip.splitLines() == @["3", "5", "0"]
