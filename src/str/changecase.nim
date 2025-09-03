@@ -19,12 +19,11 @@ proc strcase*(transform: StrTransform, quiet = false, strings: seq[string]): int
       output(newstr & "\n")
   return exitcode
 
-proc strcaseCmd*(args: seq[string]): int =
+proc strcaseCmd*(cmd: string, args: seq[string]): int =
   if args.len == 0:
     strcaseUsage()
     return 1
 
-  let cmd = args[0]
   var transform: StrTransform
   case cmd
   of "lower":
@@ -35,34 +34,31 @@ proc strcaseCmd*(args: seq[string]): int =
     strcaseUsage()
     return 1
 
-  let rest =
-    if args.len > 1: args[1 .. ^1]
-    else: @[]
-
   var quiet = false
   var strings: seq[string] = @[]
   var optionsDone = false
 
-  for kind, key, val in getopt(rest):
-    case kind
-    of cmdArgument:
-      strings.add key
-      optionsDone = true
-    of cmdLongOption, cmdShortOption:
-      if optionsDone:
-        var prefix = if kind == cmdShortOption: "-" else: "--"
-        strings.add prefix & key
-      else:
-        case key:
-        of "h", "help":
-          strcaseUsage()
-          return 0
-        of "q", "quiet":
-          quiet = true
-        of "":
-          optionsDone = true
-    of cmdEnd:
-      discard
+  if args.len > 0:
+    for kind, key, val in getopt(args):
+      case kind
+      of cmdArgument:
+        strings.add key
+        optionsDone = true
+      of cmdLongOption, cmdShortOption:
+        if optionsDone:
+          var prefix = if kind == cmdShortOption: "-" else: "--"
+          strings.add prefix & key
+        else:
+          case key
+          of "h", "help":
+            strcaseUsage()
+            return 0
+          of "q", "quiet":
+            quiet = true
+          of "":
+            optionsDone = true
+      of cmdEnd:
+        discard
 
   let piped = getPipedArgs()
   if strings.len > 0 and piped.len > 0:
@@ -75,5 +71,8 @@ proc strcaseCmd*(args: seq[string]): int =
 
 when isMainModule:
   import std/os
-  var exitcode = strcaseCmd(commandLineParams())
+  var args = commandLineParams()
+  var subcmd = args[0]
+  var rest = args[1 ..^ 1]
+  var exitcode = strcaseCmd(subcmd, rest)
   quit(exitcode)

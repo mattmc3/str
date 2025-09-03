@@ -37,7 +37,7 @@ when isMainModule:
   var exitcode = 0
   case cmd
   of "lower", "upper":
-    exitcode = strcaseCmd(args)
+    exitcode = strcaseCmd(cmd, rest)
   of "length":
     exitcode = strlengthCmd(rest)
   of "-h", "--help", "help":
