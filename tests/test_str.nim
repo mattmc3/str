@@ -30,14 +30,13 @@ proc runStr(
 suite "str usage":
   test "usage: no args":
     let r = runStr(@[])
-    check r.code == 0
-    check "str - manipulate strings" in r.stdout
-    check "Usage:" in r.stdout
+    check r.code == 2
+    check "str: missing subcommand" in r.stdout
 
   test "usage: help (-h)":
     let r = runStr(@["-h"])
     check r.code == 0
-    check "help    print comprehensive or per-cmd help" in r.stdout
+    check "print comprehensive or per-cmd help" in r.stdout
     check "length" in r.stdout
 
   test "usage: help subcommand":
@@ -46,11 +45,11 @@ suite "str usage":
     check "length" in r.stdout
     check "upper" in r.stdout
 
-  test "unknown subcommand":
+  test "invalid subcommand":
     let r = runStr(@["wat"])
     check r.code != 0
     let combined = (r.stderr & r.stdout).toLowerAscii
-    check ("no such" in combined) or ("unknown" in combined)
+    check ("no such" in combined) or ("invalid" in combined)
 
 # Upper subcommand
 suite "str upper":
