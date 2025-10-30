@@ -39,6 +39,7 @@ proc strmatch*(
     outerr("str match: --groups-only / --index require --regex")
     return 2
 
+  var numMatches = 0
   result = 1
   var pat = pattern
   if not isRegex:
@@ -57,7 +58,6 @@ proc strmatch*(
 
   for s in strings:
     var matches: seq[string] = @[]
-
     for m in s.findAll(rx):
       matches.add(m)
       if not allMatches:
@@ -65,15 +65,21 @@ proc strmatch*(
 
     if matches.len > 0 and not invert:
       result = 0
-      if not quiet:
-        for mm in matches:
+      for mm in matches:
+        inc numMatches
+        if not quiet:
           if entireString:
             output(s)
           else:
             output(mm)
     elif matches.len == 0 and invert:
       result = 0
-      output(s)
+      inc numMatches
+      if not quiet:
+        output(s)
+
+    if maxMatches > 0 and numMatches >= maxMatches:
+      break
 
   return result
 
