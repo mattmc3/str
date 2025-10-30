@@ -5,8 +5,8 @@ import ./utils
 type StrTransform* = proc(s: string): string
 
 proc strcaseUsage*() =
-  output("string lower [-q | --quiet] [STRING ...]")
-  output("string upper [-q | --quiet] [STRING ...]")
+  output("str lower [-q | --quiet] [STRING ...]")
+  output("str upper [-q | --quiet] [STRING ...]")
 
 proc strcase*(transform: StrTransform, quiet = false, strings: seq[string]): int =
   ## Change the case for each string argument
