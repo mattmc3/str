@@ -2,14 +2,13 @@ import posix
 import std/strutils
 
 proc output*(s: string) =
-  stdout.write(s)
-  stdout.write('\n')
+  stdout.writeLine(s)
 
 proc outerr*(s: string, prefix = "") =
   let newStr = s.strip(leading = false)
   for line in newStr.splitLines(keepEol = false):
     stderr.write(prefix)
-    stderr.write(line & '\n')
+    stderr.writeLine(line)
 
 proc getPipedArgs*(): seq[string] =
   result = @[]
